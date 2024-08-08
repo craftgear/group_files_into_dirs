@@ -8,13 +8,14 @@
 
 use clap::Parser;
 use owo_colors::OwoColorize;
+use std::path::Path;
 
 mod errors;
-mod files;
+mod fs;
 mod parse_args;
 
 use errors::Error;
-use files::*;
+use fs::*;
 use parse_args::parse_args;
 
 #[derive(Parser, Debug)]
@@ -27,13 +28,14 @@ pub struct Args {
 fn main() -> Result<(), Error> {
     let Args { keywords, path } = Args::parse();
     let (keywords, path) = parse_args(keywords, path)?;
-    mkdir_for_keywords(&keywords, &path)?;
-    let files = files_in_dir(&path)?;
+    let pathbuf = Path::new(&path).to_path_buf();
+    mkdir_for_keywords(&keywords, &pathbuf)?;
+    let files = files_in_dir(&pathbuf)?;
     match move_files_to_dir(&files, &keywords) {
-        Ok(success_count) => {
+        Ok(result) => {
             let msg = format!(
                 "moved {} files to {} directories",
-                success_count,
+                result.len(),
                 keywords.len()
             );
             println!("{}", msg.bold().green());
