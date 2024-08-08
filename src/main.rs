@@ -1,11 +1,3 @@
-// DONE: 引数で分類キーワードを受け取る
-// DONE: 分類キーワードのディレクトリがなければ作成する
-// DONE: 指定したディレクトリのファイルを読み込む
-// DONE: ファイル名が分類キーワードを含む場合、そのファイルを指定したディレクトリに移動する
-// DONE: ファイルを分割する
-// DONE: テストを書く
-// TODO: READMEを書く
-
 use clap::Parser;
 use owo_colors::OwoColorize;
 use std::path::Path;
