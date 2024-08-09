@@ -58,13 +58,5 @@ fn use_keywords(keywords: String, path: String) -> Result<(), Error> {
 fn interactive_mode(path: String) -> Result<(), Error> {
     let filenames = files_in_dir(&Path::new(&path).to_path_buf())?;
 
-    let keywords = interactive::execute(filenames);
-    for (keyword, count) in &keywords {
-        if keyword.starts_with("獣") {
-            let msg = format!("{:>5}: {}", count, keyword);
-            println!("{}", msg);
-        }
-    }
-
-    Ok(())
+    interactive::execute(filenames)
 }

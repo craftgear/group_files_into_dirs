@@ -34,6 +34,9 @@ group_files_into_dir -k <keywords> <dir>
 ## Example
 
 ```bash
+# invoke interactive mode (default)
+group_files_into_dir ./
+
 # group files in current directory based on keywords "hello" and "world"
 group_files_into_dir -k "hello,world" ./
 ```
