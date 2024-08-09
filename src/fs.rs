@@ -26,10 +26,15 @@ pub fn mkdir_for_keywords(keywords: &Vec<String>, basepath: &PathBuf) -> Result<
 
 pub fn files_in_dir(path: &PathBuf) -> Result<Vec<String>, Error> {
     let files = fs::read_dir(path)?
-        .map(|entry| entry.map(|e| e.path()))
-        .filter_map(|result| match result {
-            Ok(path) => Some(path),
-            Err(_) => None,
+        .filter_map(|result| result.ok())
+        .filter_map(|entry| {
+            let filename = entry.file_name().into_string().ok()?;
+            let filetype = entry.file_type().ok()?;
+            // ignore hidden files and directories
+            if filename.starts_with(".") || filetype.is_dir() {
+                return None;
+            }
+            Some(entry.path())
         })
         .filter(|e| e.is_file())
         .map(|e| e.to_str().unwrap().to_string())
@@ -47,6 +52,9 @@ pub fn move_files_to_dir(
     for file in files {
         let lower_filename = file.to_lowercase();
         for keyword in keywords {
+            if file.ends_with(keyword) {
+                continue;
+            }
             let lower_keyword = keyword.to_lowercase();
             if lower_filename.contains(&lower_keyword) {
                 let src = Path::new(file);
