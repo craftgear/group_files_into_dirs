@@ -60,6 +60,12 @@ pub fn move_files_to_dir(
             let lower_keyword = keyword.to_lowercase();
             if lower_filename.contains(&lower_keyword) {
                 let src = &basepath.join(filename);
+                // files could be moved by other keywords.
+                if src.exists() == false {
+                    let msg = format!("{} is already moved", filename);
+                    println!("{}", msg.yellow());
+                    continue;
+                }
                 let dst = &basepath.join(keyword).join(filename);
                 let result = rename(src, &dst);
                 if result.is_ok() {
@@ -99,12 +105,13 @@ mod tests {
         fs::remove_dir_all(&bar_dir).unwrap();
     }
 
-    const FILES: [&str; 6] = [
+    const FILES: [&str; 7] = [
         "inquiry_1.txt",
         "inquiry_2.md",
         "invoice_1.txt",
         "invoice_2.md",
         "invoice_3.pdf",
+        "inquiry_invoice.pdf",
         "questionnaire_1.xls",
     ];
 
@@ -147,7 +154,7 @@ mod tests {
         let _ = mkdir_for_keywords(&keywords, &tmpdir);
         let files = files_in_dir(&tmpdir).unwrap();
         let moved_files = move_files_to_dir(&tmpdir, &files, &keywords).unwrap();
-        assert_eq!(moved_files.len(), 5);
+        assert_eq!(moved_files.len(), 6);
 
         for file in moved_files.iter() {
             assert_eq!(Path::new(file).exists(), true);

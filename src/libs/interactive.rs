@@ -1,7 +1,8 @@
 use regex::Regex;
 use std::collections::HashMap;
-use unicode_normalization::UnicodeNormalization;
+// use unicode_normalization::UnicodeNormalization;
 
+// return x.as_str().nfc().collect::<String>();
 fn extract_keywords(filename: &String) -> Vec<String> {
     let re = Regex::new(r"\((.+?)\)|\[(.+?)\]").unwrap();
     let mut keywords = re
@@ -9,8 +10,12 @@ fn extract_keywords(filename: &String) -> Vec<String> {
         .filter_map(|captures| {
             let keyword_tuple = captures
                 .iter()
-                .filter(|capture| capture.is_some())
-                .map(|x| x.unwrap().as_str().nfkc().collect::<String>())
+                .filter_map(|capture| {
+                    if let Some(x) = capture {
+                        return Some(x.as_str().to_string());
+                    }
+                    None
+                })
                 .collect::<Vec<_>>();
 
             if keyword_tuple.len() != 2 {
@@ -18,11 +23,11 @@ fn extract_keywords(filename: &String) -> Vec<String> {
             }
             keyword_tuple.get(1).cloned()
         })
-        .filter(|keyword| keyword.len() >= 2) // キーワードは2文字以上
+        .filter(|keyword| keyword.len() >= 2) // keywords should have more than 2 characters
         .collect::<Vec<_>>();
 
     // ()[]を削除して、残りの文字列を取得
-    let rest = re.replace_all(filename, "").nfkc().collect::<String>();
+    let rest = re.replace_all(filename, "");
     let ext_regex = Regex::new(r"\.([a-zA-Z0-9]+)$").unwrap();
     let mut splitted_rest = ext_regex
         .replace(&rest, "")
@@ -30,7 +35,7 @@ fn extract_keywords(filename: &String) -> Vec<String> {
         .filter_map(|s| {
             let s = s.to_string();
             if s.len() >= 2 {
-                // キーワードは2文字以上
+                // keywords should have more than 2 characters
                 return Some(s);
             }
             None
@@ -62,6 +67,7 @@ pub fn execute(filenames: Vec<String>) -> Vec<(String, usize)> {
     let mut keyword_vec: Vec<(String, usize)> = keyword_hash.into_iter().collect();
     keyword_vec.sort_by(|a, b| b.1.cmp(&a.1));
 
+    // filter keywords that appear more than twice.
     let keywords = keyword_vec
         .into_iter()
         .filter(|(_, count)| *count > 1)

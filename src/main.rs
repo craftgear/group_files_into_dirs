@@ -59,12 +59,12 @@ fn interactive_mode(path: String) -> Result<(), Error> {
     let filenames = files_in_dir(&Path::new(&path).to_path_buf())?;
 
     let keywords = interactive::execute(filenames);
-    println!("keywords is {:?}", keywords);
-    // let more_than_one = keywords
-    //     .iter()
-    //     .filter(|(_, count)| count > &1)
-    //     .collect::<Vec<_>>();
-    // println!("keywords is {:?}", more_than_one);
+    for (keyword, count) in &keywords {
+        if keyword.starts_with("獣") {
+            let msg = format!("{:>5}: {}", count, keyword);
+            println!("{}", msg);
+        }
+    }
 
     Ok(())
 }
