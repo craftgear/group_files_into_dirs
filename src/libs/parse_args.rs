@@ -1,4 +1,4 @@
-use crate::errors::Error;
+use crate::libs::errors::Error;
 
 pub fn parse_args(keywords: String, path: String) -> Result<(Vec<String>, String), Error> {
     let keywords = keywords
