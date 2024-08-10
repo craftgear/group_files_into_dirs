@@ -13,7 +13,7 @@ Download binary file from [releases](https://github.com/craftgear/group_files_in
 or using cargo to Install
 
 ```bash
-cargo install group-files-into-dir
+cargo install group_files_into_dir
 ```
 
 or build from source.
