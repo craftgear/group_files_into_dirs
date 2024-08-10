@@ -1,7 +1,5 @@
 use regex::Regex;
 use std::collections::HashMap;
-// use unicode_normalization::UnicodeNormalization;
-//
 
 static EXT_REGEX_STR: &str = r"\.([a-zA-Z0-9]+)$";
 static PAREN_REGEX_STR: &str = r"\((.+?)\)|\[(.+?)\]|\{(.+?)\}";

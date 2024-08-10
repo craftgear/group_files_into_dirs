@@ -66,9 +66,11 @@ pub fn run(keywords: Vec<(String, usize)>) -> Result<Vec<String>, Error> {
                     .v_align(VAlign::Top),
             )
             .child(
-                TextView::new("<Space> to toggle, <Enter> to run grouping, <q or ESC> to abort.")
-                    .h_align(HAlign::Left)
-                    .v_align(VAlign::Top),
+                TextView::new(
+                    "<Space> to toggle check, <Enter> to run grouping, <q or ESC> to abort.",
+                )
+                .h_align(HAlign::Left)
+                .v_align(VAlign::Top),
             )
             .child(DummyView.fixed_height(1))
             .child(
@@ -95,7 +97,7 @@ pub fn run(keywords: Vec<(String, usize)>) -> Result<Vec<String>, Error> {
                                 LinearLayout::horizontal()
                                     .child(checkbox)
                                     .child(DummyView.fixed_width(1))
-                                    .child(TextView::new(format!("{count:>4} {keyword}"))),
+                                    .child(TextView::new(format!("{count:>4}  {keyword}"))),
                             )
                         }
                     })

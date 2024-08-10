@@ -1,4 +1,4 @@
-use clap::{ArgAction, Parser};
+use clap::Parser;
 use std::path::Path;
 
 mod libs;
