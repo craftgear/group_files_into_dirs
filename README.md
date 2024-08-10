@@ -16,20 +16,23 @@ cargo build --release
 extract keywords from filenames.
 delimiters are `,_- ` and braces.
 
+- dir: directory to group files in.
+
 ```bash
 group_files_into_dir <dir>
 ```
+[interactive mode](./images/interactive_mode.jpeg)
 
-- dir: directory to group files in.
+
 
 ### specify keywords by yourself
+
+- keywords: words to use for grouping files, comma separated.
+- dir: directory to group files in.
 
 ```bash
 group_files_into_dir -k <keywords> <dir> 
 ```
-
-- keywords: words to use for grouping files, comma separated.
-- dir: directory to group files in.
 
 ## Example
 
