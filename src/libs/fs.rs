@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 
 use crate::libs::errors::Error;
 
-pub fn mkdir_for_keywords(keywords: &Vec<String>, basepath: &PathBuf) -> Result<(), Error> {
+pub fn mkdir_for_keyword(keyword: String, basepath: &PathBuf) -> Result<String, Error> {
     if !Path::exists(&basepath) {
         return Err(Error::IOError(format!(
             "path {} is not exists",
@@ -13,24 +13,23 @@ pub fn mkdir_for_keywords(keywords: &Vec<String>, basepath: &PathBuf) -> Result<
         )));
     }
 
-    for keyword in keywords {
-        let full_path_dirname = Path::new(basepath).join(keyword);
-        if Path::exists(&full_path_dirname) {
-            continue;
-        }
-        fs::create_dir(full_path_dirname)?;
+    let full_path_dirname = Path::new(basepath).join(&keyword);
+    if Path::exists(&full_path_dirname) {
+        return Ok(keyword);
     }
+    fs::create_dir(full_path_dirname)?;
 
-    Ok(())
+    Ok(keyword)
 }
 
 pub fn files_in_dir(path: &PathBuf) -> Result<Vec<String>, Error> {
     let files = fs::read_dir(path)?
         .filter_map(|e| {
             if let Ok(entry) = e {
+                let metadata = entry.metadata().ok()?;
                 let filename = entry.file_name().into_string().ok()?;
 
-                if filename.starts_with(".") {
+                if filename.starts_with(".") || metadata.is_dir() {
                     return None;
                 }
 
@@ -47,6 +46,7 @@ pub fn move_files_to_dir(
     basepath: &PathBuf,
     filenames: &Vec<String>,
     keywords: &Vec<String>,
+    verbose: bool,
 ) -> Result<Vec<String>, Error> {
     let mut moved_files = vec![];
 
@@ -59,22 +59,31 @@ pub fn move_files_to_dir(
             }
             let lower_keyword = keyword.to_lowercase();
             if lower_filename.contains(&lower_keyword) {
+                let dirname = mkdir_for_keyword(keyword.to_string(), basepath)?;
                 let src = &basepath.join(filename);
                 // files could be moved by other keywords.
-                if src.exists() == false {
+                if !src.exists() {
                     let msg = format!("{} is already moved", filename);
                     println!("{}", msg.yellow());
                     continue;
                 }
-                let dst = &basepath.join(keyword).join(filename);
+                let dst = &basepath.join(dirname).join(filename);
+                // destination file is already exists.
+                if dst.exists() {
+                    let msg = format!("{} is already exists in {}", filename, keyword);
+                    println!("{}", msg.yellow());
+                    continue;
+                }
                 let result = rename(src, &dst);
                 if result.is_ok() {
                     moved_files.push(dst.to_str().unwrap().to_string());
-                    let msg = format!("move {} to directory {:?}", filename, &dst);
-                    println!("{}", msg.green());
+                    if verbose {
+                        let msg = format!("move {} to directory {}", filename, &dst.display());
+                        println!("{}", msg.blue());
+                    }
                 } else {
                     let msg = format!(
-                        "src {}, filename {:?}, dst {}",
+                        "src {}\nfilename {}\ndst {}\n",
                         src.display(),
                         filename,
                         dst.display()
@@ -89,6 +98,30 @@ pub fn move_files_to_dir(
     Ok(moved_files)
 }
 
+pub fn move_files_to_dir_by_keywords(
+    keywords: Vec<String>,
+    pathbuf: PathBuf,
+    verbose: bool,
+) -> Result<(), Error> {
+    let files = files_in_dir(&pathbuf)?;
+    match move_files_to_dir(&pathbuf, &files, &keywords, verbose) {
+        Ok(result) => {
+            let msg = format!(
+                "moved {} files to {} directories",
+                result.len(),
+                keywords.len()
+            );
+            println!("{}", msg.bold().green());
+        }
+        Err(err) => {
+            let msg = format!("{}", err);
+            println!("{}", msg.bold().red());
+        }
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -96,13 +129,11 @@ mod tests {
     #[test]
     fn test_mkdir_for_keywords() {
         let tmpdir = std::env::temp_dir();
-        mkdir_for_keywords(&vec![String::from("foo"), String::from("bar")], &tmpdir).unwrap();
-        let foo_dir = tmpdir.join("foo");
-        let bar_dir = tmpdir.join("bar");
-        assert_eq!(foo_dir.exists(), true);
-        assert_eq!(bar_dir.exists(), true);
-        fs::remove_dir_all(&foo_dir).unwrap();
-        fs::remove_dir_all(&bar_dir).unwrap();
+        for keyword in vec!["foo", "bar", "(baz)", "[aaa]", "{bbb}"] {
+            let dirname = mkdir_for_keyword(keyword.to_string(), &tmpdir).unwrap();
+            let new_dir = tmpdir.join(dirname);
+            assert_eq!(new_dir.exists(), true);
+        }
     }
 
     const FILES: [&str; 7] = [
@@ -151,9 +182,8 @@ mod tests {
         }
 
         let keywords = vec![String::from("inquiry"), String::from("invoice")];
-        let _ = mkdir_for_keywords(&keywords, &tmpdir);
         let files = files_in_dir(&tmpdir).unwrap();
-        let moved_files = move_files_to_dir(&tmpdir, &files, &keywords).unwrap();
+        let moved_files = move_files_to_dir(&tmpdir, &files, &keywords, true).unwrap();
         assert_eq!(moved_files.len(), 6);
 
         for file in moved_files.iter() {
