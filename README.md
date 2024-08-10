@@ -2,7 +2,7 @@
 
 a CLI tool to group files into directories based on their filenames.
 
-![interactive mode](./images/interactive_mode.jpeg)
+![interactive mode](./images/interactive_mode.jpg)
 
 
 ## Installation
