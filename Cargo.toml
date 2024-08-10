@@ -4,6 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.86"
 clap = { version = "4.5.13", features = ["derive"] }
+cursive = "0.21.1"
 owo-colors = "4.0.0"
+promkit = "0.4.5"
+regex = "1.10.6"
+spinners = "4.1.1"
 thiserror = "1.0.63"
+unicode-normalization = "0.1.23"

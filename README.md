@@ -11,15 +11,32 @@ cargo build --release
 
 ## Usage
 
+### Interactive mode
+
+extract keywords from filenames.
+delimiters are `,_- ` and braces.
+
+```bash
+group_files_into_dir <dir>
+```
+
+- dir: directory to group files in.
+
+### specify keywords by yourself
+
 ```bash
 group_files_into_dir -k <keywords> <dir> 
 ```
+
 - keywords: words to use for grouping files, comma separated.
 - dir: directory to group files in.
 
 ## Example
 
 ```bash
+# invoke interactive mode (default)
+group_files_into_dir ./
+
 # group files in current directory based on keywords "hello" and "world"
 group_files_into_dir -k "hello,world" ./
 ```

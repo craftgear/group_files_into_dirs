@@ -1,3 +1,5 @@
+// use anyhow::Error as AnyError;
+
 #[derive(Clone, Debug, thiserror::Error)]
 pub enum Error {
     #[error("move file error: {0}")]
@@ -15,3 +17,9 @@ impl From<std::io::Error> for Error {
         Error::IOError(e.to_string())
     }
 }
+
+// impl From<AnyError> for Error {
+//     fn from(e: anyhow::Error) -> Self {
+//         Error::IOError(e.to_string())
+//     }
+// }
