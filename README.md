@@ -2,7 +2,14 @@
 
 a CLI tool to group files into directories based on their filenames.
 
+![interactive mode](./images/interactive_mode.jpeg)
+
+
 ## Installation
+
+Download binary file from [releases](https://github.com/craftgear/group_files_into_dirs/releases) page.
+
+or build from source.
 
 ```bash
 git clone https://github.com/craftgear/group_files_into_dirs
@@ -21,8 +28,6 @@ delimiters are `,_- ` and braces.
 ```bash
 group_files_into_dir <dir>
 ```
-[interactive mode](./images/interactive_mode.jpeg)
-
 
 
 ### specify keywords by yourself
