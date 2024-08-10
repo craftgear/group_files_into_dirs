@@ -6,7 +6,6 @@ license = "MIT"
 description = "Group files into directories based on keywords"
 repository = "https://github.com/craftgear/group_files_into_dirs"
 readme = "README.md"
-keywords = ["file utility", "file organization"]
 categories = ["command-line-utilities"]
 exclude = ["images/*"]
 
