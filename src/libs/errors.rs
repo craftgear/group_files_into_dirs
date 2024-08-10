@@ -8,8 +8,8 @@ pub enum Error {
     KeywordLengthError(String),
     #[error("io error: {0}")]
     IOError(String),
-    #[error("parse error: {0}")]
-    ParseError(String),
+    // #[error("parse error: {0}")]
+    // ParseError(String),
 }
 
 impl From<std::io::Error> for Error {
@@ -17,9 +17,3 @@ impl From<std::io::Error> for Error {
         Error::IOError(e.to_string())
     }
 }
-
-// impl From<AnyError> for Error {
-//     fn from(e: anyhow::Error) -> Self {
-//         Error::IOError(e.to_string())
-//     }
-// }
