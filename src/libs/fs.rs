@@ -59,7 +59,6 @@ pub fn move_files_to_dir(
             }
             let lower_keyword = keyword.to_lowercase();
             if lower_filename.contains(&lower_keyword) {
-                let dirname = mkdir_for_keyword(keyword.to_string(), basepath)?;
                 let src = &basepath.join(filename);
                 // files could be moved by other keywords.
                 if !src.exists() {
@@ -67,6 +66,9 @@ pub fn move_files_to_dir(
                     println!("{}", msg.yellow());
                     continue;
                 }
+                // create a new directory for the keyword.
+                let dirname = mkdir_for_keyword(keyword.to_string(), basepath)?;
+
                 let dst = &basepath.join(dirname).join(filename);
                 // destination file is already exists.
                 if dst.exists() {

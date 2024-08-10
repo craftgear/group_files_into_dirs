@@ -7,9 +7,10 @@ use crate::libs::fs::files_in_dir;
 use crate::libs::tui::run;
 
 pub fn execute(pathbuf: &PathBuf) -> Result<Vec<String>, Error> {
+    println!("");
     let mut sp = Spinner::new(
         Spinners::CircleHalves,
-        "Extracting keywords from filenames...".into(),
+        "Extracting keywords with 3 or more charaters from filenames...".into(),
     );
 
     let filenames = files_in_dir(&pathbuf)?;

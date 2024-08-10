@@ -12,7 +12,6 @@ fn extract_file_basename(filename: &String) -> String {
     re.replace_all(filename, "").to_string()
 }
 
-// return x.as_str().nfc().collect::<String>();
 fn extract_keywords(filename_wo_ext: &String) -> Vec<String> {
     let filename_wo_ext = extract_file_basename(filename_wo_ext);
     let re = Regex::new(PAREN_REGEX_STR).unwrap();
@@ -34,7 +33,7 @@ fn extract_keywords(filename_wo_ext: &String) -> Vec<String> {
             }
             keyword_tuple.get(1).cloned() // 0. matched str, 1. captured str
         })
-        .filter(|keyword| keyword.len() > 1) // keywords should have more than 1 character, excludeing parentheses
+        .filter(|keyword| keyword.len() > 2) // keywords should have more than 3 character, excludeing parentheses
         .collect::<Vec<_>>();
 
     // ()[]を削除して、残りの文字列を取得
@@ -82,7 +81,7 @@ mod tests {
         let result = extract_keywords(&filename);
         assert_eq!(
             result,
-            vec!["000", "111", "222", "333(444)", "00", "zzz", "aaa", "bbb", "ccc", "ddd", "eee"]
+            vec!["000", "111", "222", "333(444)", "zzz", "aaa", "bbb", "ccc", "ddd", "eee"]
         );
     }
 
@@ -98,7 +97,6 @@ mod tests {
             ("000".to_string(), 3),
             ("111".to_string(), 3),
             ("222".to_string(), 3),
-            ("00".to_string(), 3),
             ("zzz".to_string(), 3),
             ("333(444)".to_string(), 1),
             ("444(555)".to_string(), 1),
