@@ -2,6 +2,13 @@
 name = "group_files_into_dirs"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Group files into directories based on keywords"
+repository = "https://github.com/craftgear/group_files_into_dirs"
+readme = "README.md"
+keywords = ["file utility", "file organization"]
+categories = ["command-line-utilities"]
+exclude = ["images/*"]
 
 [dependencies]
 anyhow = "1.0.86"

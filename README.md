@@ -7,7 +7,14 @@ a CLI tool to group files into directories based on their filenames.
 
 ## Installation
 
+
 Download binary file from [releases](https://github.com/craftgear/group_files_into_dirs/releases) page.
+
+or using cargo to Install
+
+```bash
+cargo install group-files-into-dir
+```
 
 or build from source.
 
