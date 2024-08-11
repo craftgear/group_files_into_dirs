@@ -9,6 +9,13 @@ readme = "README.md"
 categories = ["command-line-utilities"]
 exclude = ["images/*"]
 
+[profile.release]
+strip = true
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+
 [dependencies]
 anyhow = "1.0.86"
 clap = { version = "4.5.13", features = ["derive"] }
@@ -19,3 +26,5 @@ regex = "1.10.6"
 spinners = "4.1.1"
 thiserror = "1.0.63"
 unicode-normalization = "0.1.23"
+
+
