@@ -1,6 +1,5 @@
 use owo_colors::OwoColorize;
 use std::fs;
-use std::fs::rename;
 use std::path::{Path, PathBuf};
 
 use crate::libs::errors::Error;
@@ -76,7 +75,7 @@ pub fn move_files_to_dir(
                     println!("{}", msg.yellow());
                     continue;
                 }
-                let result = rename(src, &dst);
+                let result = fs::rename(src, &dst);
                 if result.is_ok() {
                     moved_files.push(dst.to_str().unwrap().to_string());
                     if verbose {
