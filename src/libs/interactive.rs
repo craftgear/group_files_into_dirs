@@ -16,8 +16,8 @@ pub fn execute(pathbuf: &PathBuf) -> Result<Vec<String>, Error> {
     let filenames = files_in_dir(&pathbuf)?;
 
     let keyword_hash = extract_keywords_from_filenames(&filenames);
-    let mut keyword_vec: Vec<(String, usize)> = keyword_hash.into_iter().collect();
-    keyword_vec.sort_by(|a, b| b.1.cmp(&a.1));
+
+    let keyword_vec = sort_by_count_and_keyword_length(keyword_hash.clone());
 
     // filter keywords that appear more than once.
     let keywords = keyword_vec
@@ -25,7 +25,7 @@ pub fn execute(pathbuf: &PathBuf) -> Result<Vec<String>, Error> {
         .filter(|(_, count)| *count > 1)
         .collect::<Vec<_>>();
 
-    sp.stop();
+    sp.stop_with_newline();
 
     let selected_keywords = run(keywords)?;
 

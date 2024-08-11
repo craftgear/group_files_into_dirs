@@ -68,6 +68,36 @@ pub fn extract_keywords_from_filenames(filenames: &Vec<String>) -> HashMap<Strin
     keyword_hash
 }
 
+// sort by count first, then by keyword length
+pub fn sort_by_count_and_keyword_length(
+    keyword_hash: HashMap<String, usize>,
+) -> Vec<(String, usize)> {
+    let mut histogram: HashMap<usize, Vec<String>> =
+        keyword_hash
+            .clone()
+            .into_iter()
+            .fold(HashMap::new(), |mut acc, (keyword, count)| {
+                acc.entry(count)
+                    .and_modify(|vec| vec.push(keyword.clone()))
+                    .or_insert(vec![keyword.clone()]);
+                acc
+            });
+
+    let mut count_vec = histogram.clone().into_keys().collect::<Vec<_>>();
+    count_vec.sort_by(|a, b| b.cmp(&a));
+
+    let sorted_keyword_vec = count_vec.iter().fold(vec![], |mut acc, count| {
+        let keywords = histogram.get_mut(count).unwrap();
+        keywords.sort_by(|a, b| b.chars().count().cmp(&a.chars().count()));
+        keywords.iter().for_each(|keyword| {
+            acc.push((keyword.clone(), *count));
+        });
+        acc
+    });
+
+    sorted_keyword_vec
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -108,5 +138,10 @@ mod tests {
             ("ggg".to_string(), 1),
         ]);
         assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_sort_by_count_and_keyword_length() {
+        todo!();
     }
 }

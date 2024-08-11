@@ -107,18 +107,23 @@ pub fn move_files_to_dir_by_keywords(
     let files = files_in_dir(&pathbuf)?;
     match move_files_to_dir(&pathbuf, &files, &keywords, verbose) {
         Ok(result) => {
-            let msg = format!(
-                "moved {} files to {} directories",
-                result.len(),
-                keywords.len()
-            );
-            println!("{}", msg.bold().green());
+            if result.len() == 0 {
+                let msg = format!("no files are moved.");
+                println!("{}", msg.bold().blue());
+            } else {
+                let msg = format!(
+                    "moved {} files to {} directories.",
+                    result.len(),
+                    keywords.len()
+                );
+                println!("{}", msg.bold().green());
+            }
         }
         Err(err) => {
             let msg = format!("{}", err);
-            println!("{}", msg.bold().red());
+            println!("Error: {}.", msg.bold().red());
         }
-    }
+    };
 
     Ok(())
 }
