@@ -8,7 +8,7 @@ a CLI tool to group files into directories based on their filenames.
 ## Installation
 
 
-Download binary file from [releases](https://github.com/craftgear/group_files_into_dirs/releases) page.
+Download binary file from [releases](https://github.com/craftgear/group_files_into_dirs/releases) page and put it in a path directory.
 
 or using cargo to Install
 
@@ -35,7 +35,6 @@ delimiters are `,_- ` and braces `()[]{}` .
 ```bash
 group_files_into_dir <dir>
 ```
-
 
 ### specify keywords by yourself
 
