@@ -28,7 +28,7 @@ cargo build --release
 ### Interactive mode (default)
 
 extract keywords from filenames.
-delimiters are `,_- ` and braces.
+delimiters are `,_- ` and braces `()[]{}` .
 
 - `dir` - directory to group files in.
 
