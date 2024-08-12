@@ -2,8 +2,7 @@
 
 a CLI tool to group files into directories based on their filenames.
 
-![interactive mode](./images/interactive_mode.jpg)
-
+![group_files_into_dir.gif](./images/group_files_into_dir.gif)
 
 ## Installation
 
@@ -49,9 +48,13 @@ group_files_into_dir -k <keywords> <dir>
 
 ```bash
 # invoke interactive mode (default)
+# then ask you to select keywords.
 group_files_into_dir ./
+```
 
+```bash
 # group files in current directory based on keywords "hello" and "world"
+# no keyword selection prompt will be shown.
 group_files_into_dir -k "hello,world" ./
 ```
 
