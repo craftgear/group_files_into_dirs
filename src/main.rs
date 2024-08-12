@@ -1,4 +1,5 @@
 use clap::Parser;
+use owo_colors::OwoColorize;
 use std::path::Path;
 
 mod libs;
@@ -28,6 +29,12 @@ fn main() -> Result<(), Error> {
         path,
         verbose,
     } = Args::parse();
+
+    if !Path::new(&path).exists() {
+        let msg = format!("Eroor: path {} does not exist", path);
+        println!("{}", msg.red());
+        return Ok(());
+    }
 
     if let Some(keywords) = keywords {
         return use_keywords(keywords, path, verbose);

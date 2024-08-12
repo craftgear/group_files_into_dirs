@@ -10,7 +10,7 @@ pub fn execute(pathbuf: &PathBuf) -> Result<Vec<String>, Error> {
     println!("");
     let mut sp = Spinner::new(
         Spinners::CircleHalves,
-        "Extracting keywords with 3 or more charaters from filenames".into(),
+        "Extracting keywords with 2 or more charaters from filenames".into(),
     );
 
     let filenames = files_in_dir(&pathbuf)?;

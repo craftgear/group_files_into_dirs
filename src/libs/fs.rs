@@ -105,6 +105,7 @@ pub fn move_files_to_dir_by_keywords(
     verbose: bool,
 ) -> Result<(), Error> {
     let files = files_in_dir(&pathbuf)?;
+
     match move_files_to_dir(&pathbuf, &files, &keywords, verbose) {
         Ok(result) => {
             if result.len() == 0 {

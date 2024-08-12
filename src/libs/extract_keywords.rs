@@ -10,6 +10,24 @@ fn extract_file_basename(filename: &String) -> String {
     re.replace_all(filename, "").to_string()
 }
 
+// pub fn extract_keywords_from_camel_case(filename_wo_ext: &String) -> Vec<String> {
+//     let modified_string = filename_wo_ext
+//         .chars()
+//         .filter_map(|c: char| match c {
+//             'a'..='z' => Some(c.to_string()),
+//             'A'..='Z' => Some(format!(" {}", c)),
+//             ' ' => None,
+//             _ => Some(c.to_string()),
+//         })
+//         .collect::<String>();
+//
+//     let keywords = modified_string
+//         .split(' ')
+//         .map(|x| x.to_string())
+//         .collect::<Vec<String>>();
+//     return keywords;
+// }
+
 fn extract_keywords(filename_wo_ext: &String) -> Vec<String> {
     let filename_wo_ext = extract_file_basename(filename_wo_ext);
     let re = Regex::new(PAREN_REGEX_STR).unwrap();
@@ -185,4 +203,14 @@ mod tests {
         ];
         assert_eq!(result, expected);
     }
+
+    // #[test]
+    // fn test_extract_keywords_from_camel_case() {
+    //     let filename = "camelCase FileName Could BeParsed".to_string();
+    //     let result = extract_keywords_from_camel_case(&filename);
+    //     assert_eq!(
+    //         result,
+    //         vec!["camel", "Case", "File", "Name", "Could", "Be", "Parsed"]
+    //     );
+    // }
 }
