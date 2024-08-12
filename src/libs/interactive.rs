@@ -14,10 +14,8 @@ pub fn execute(pathbuf: &PathBuf) -> Result<Vec<String>, Error> {
     );
 
     let filenames = files_in_dir(&pathbuf)?;
-
-    let keyword_hash = extract_keywords_from_filenames(&filenames);
-
-    let keyword_vec = sort_by_count_and_keyword_length(keyword_hash.clone());
+    let keyword_hash = extract_keywords_and_count_from_filenames(&filenames);
+    let keyword_vec = sort_by_count_and_keyword_length(keyword_hash);
 
     // filter keywords that appear more than once.
     let keywords = keyword_vec

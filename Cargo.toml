@@ -24,6 +24,3 @@ promkit = "0.4.5"
 regex = "1.10.6"
 spinners = "4.1.1"
 thiserror = "1.0.63"
-unicode-normalization = "0.1.23"
-
-

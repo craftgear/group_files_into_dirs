@@ -31,7 +31,7 @@ fn extract_keywords(filename_wo_ext: &String) -> Vec<String> {
             }
             keyword_tuple.get(1).cloned() // 0. matched str, 1. captured str
         })
-        .filter(|keyword| keyword.len() > 2) // keywords should have more than 3 character, excludeing parentheses
+        .filter(|keyword| keyword.chars().count() > 1) // keywords should have more than 1 character
         .collect::<Vec<_>>();
 
     // ()[]を削除して、残りの文字列を取得
@@ -41,7 +41,7 @@ fn extract_keywords(filename_wo_ext: &String) -> Vec<String> {
         .filter_map(|s| {
             let s = s.to_string();
             // keywords should have more than 1 character
-            if s.len() > 1 {
+            if s.chars().count() > 1 {
                 return Some(s);
             }
             None
@@ -53,7 +53,9 @@ fn extract_keywords(filename_wo_ext: &String) -> Vec<String> {
     keywords
 }
 
-pub fn extract_keywords_from_filenames(filenames: &Vec<String>) -> HashMap<String, usize> {
+pub fn extract_keywords_and_count_from_filenames(
+    filenames: &Vec<String>,
+) -> HashMap<String, usize> {
     let keyword_hash: HashMap<String, usize> =
         filenames.iter().fold(HashMap::new(), |mut acc, filename| {
             let keywords = extract_keywords(filename);
@@ -88,7 +90,14 @@ pub fn sort_by_count_and_keyword_length(
 
     let sorted_keyword_vec = count_vec.iter().fold(vec![], |mut acc, count| {
         let keywords = histogram.get_mut(count).unwrap();
-        keywords.sort_by(|a, b| b.chars().count().cmp(&a.chars().count()));
+        keywords.sort_by(|a, b| {
+            if b.len() == a.len() {
+                let a_lower = a.to_lowercase();
+                let b_lower = b.to_lowercase();
+                return a_lower.chars().nth(0).cmp(&b_lower.chars().nth(0));
+            }
+            return b.len().cmp(&a.len());
+        });
         keywords.iter().for_each(|keyword| {
             acc.push((keyword.clone(), *count));
         });
@@ -109,7 +118,7 @@ mod tests {
         let result = extract_keywords(&filename);
         assert_eq!(
             result,
-            vec!["000", "111", "222", "333(444)", "zzz", "aaa", "bbb", "ccc", "ddd", "eee"]
+            vec!["000", "111", "222", "333(444)", "00", "zzz", "aaa", "bbb", "ccc", "ddd", "eee"]
         );
     }
 
@@ -120,12 +129,13 @@ mod tests {
             "(000)[111](222) [444(555)] (9)(00){zzz} aaa_bbb-ccc ddd,fff.txt".to_string(),
             "(000)[111](222) [555(666)] (9)(00){zzz} aaa_bbb-ccc ddd,ggg.txt".to_string(),
         ];
-        let result = extract_keywords_from_filenames(&filenames);
+        let result = extract_keywords_and_count_from_filenames(&filenames);
         let expected = HashMap::from_iter(vec![
             ("000".to_string(), 3),
             ("111".to_string(), 3),
             ("222".to_string(), 3),
             ("zzz".to_string(), 3),
+            ("00".to_string(), 3),
             ("333(444)".to_string(), 1),
             ("444(555)".to_string(), 1),
             ("555(666)".to_string(), 1),
@@ -142,6 +152,37 @@ mod tests {
 
     #[test]
     fn test_sort_by_count_and_keyword_length() {
-        todo!();
+        // write a test for sort_by_count_and_keyword_length
+        let keyword_hash = HashMap::from_iter(vec![
+            ("0".to_string(), 100),
+            ("1111".to_string(), 10),
+            ("222".to_string(), 10),
+            ("zz".to_string(), 10),
+            ("ああ".to_string(), 10),
+            ("aaaaa".to_string(), 3),
+            ("bbbb".to_string(), 3),
+            ("ccc".to_string(), 3),
+            ("dd".to_string(), 3),
+            ("eeeee".to_string(), 1),
+            ("いい".to_string(), 1),
+            ("gg".to_string(), 1),
+        ]);
+        let result = sort_by_count_and_keyword_length(keyword_hash);
+
+        let expected = vec![
+            ("0".to_string(), 100),
+            ("ああ".to_string(), 10),
+            ("1111".to_string(), 10),
+            ("222".to_string(), 10),
+            ("zz".to_string(), 10),
+            ("aaaaa".to_string(), 3),
+            ("bbbb".to_string(), 3),
+            ("ccc".to_string(), 3),
+            ("dd".to_string(), 3),
+            ("いい".to_string(), 1),
+            ("eeeee".to_string(), 1),
+            ("gg".to_string(), 1),
+        ];
+        assert_eq!(result, expected);
     }
 }

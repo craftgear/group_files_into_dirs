@@ -93,7 +93,7 @@ pub fn run(keywords: Vec<(String, usize)>) -> Result<Vec<String>, Error> {
                                     }
                                 });
                             list.add_child(
-                                &format!(""),
+                                "",
                                 LinearLayout::horizontal()
                                     .child(checkbox)
                                     .child(DummyView.fixed_width(1))
