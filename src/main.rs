@@ -31,7 +31,7 @@ fn main() -> Result<(), Error> {
     } = Args::parse();
 
     if !Path::new(&path).exists() {
-        let msg = format!("Eroor: path {} does not exist", path);
+        let msg = format!("Error: path {} does not exist", path);
         println!("{}", msg.red());
         return Ok(());
     }

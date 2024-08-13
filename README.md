@@ -2,7 +2,7 @@
 
 a CLI tool to group files into directories based on their filenames.
 
-![group_files_into_dir.gif](./images/group_files_into_dir.gif)
+![group_files_into_dir](./images/group_files_into_dir.gif)
 
 ## Installation
 
