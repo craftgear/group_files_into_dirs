@@ -52,7 +52,7 @@ fn extract_keywords(filename_wo_ext: &String) -> Vec<String> {
         .filter(|keyword| keyword.chars().count() > 1) // keywords should have more than 1 character
         .collect::<Vec<_>>();
 
-    // ()[]を削除して、残りの文字列を取得
+    // カッコを削除して、残りの文字列を取得
     let rest = re.replace_all(&filename_wo_ext, "");
     let mut rest_vec = rest
         .split(DELIMITERS)

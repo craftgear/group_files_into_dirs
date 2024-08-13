@@ -21,6 +21,8 @@ pub struct Args {
     pub path: String,
     #[clap(help = "Verbose output", long, short)]
     pub verbose: bool,
+    #[clap(help = "Use directory as keyword", long, short)]
+    pub dir_as_keyword: bool,
 }
 
 fn main() -> Result<(), Error> {
@@ -28,6 +30,7 @@ fn main() -> Result<(), Error> {
         keywords,
         path,
         verbose,
+        dir_as_keyword,
     } = Args::parse();
 
     if !Path::new(&path).exists() {
@@ -38,6 +41,10 @@ fn main() -> Result<(), Error> {
 
     if let Some(keywords) = keywords {
         return use_keywords(keywords, path, verbose);
+    }
+
+    if dir_as_keyword {
+        return use_dirs_as_keywords(path, verbose);
     }
 
     interactive_mode(path, verbose)
@@ -56,4 +63,8 @@ fn interactive_mode(path: String, verbose: bool) -> Result<(), Error> {
     let keywords = interactive::execute(&pathbuf)?;
 
     move_files_to_dir_by_keywords(keywords, pathbuf, verbose)
+}
+
+fn use_dirs_as_keywords(path: String, verbose: bool) -> Result<(), Error> {
+    Ok(())
 }
