@@ -26,7 +26,7 @@ pub fn execute(pathbuf: PathBuf, verbose: bool) -> Result<Vec<String>, Error> {
                 .filter(|k| k.len() > 1)
                 .map(|k| {
                     let re =
-                        regex::Regex::new(&format!(r"[\(\[\{{\-_, ]?{k}[\)\]\}}\-_, ]?")).unwrap();
+                        regex::Regex::new(&format!(r"[\(\[\{{\-_, ]?{k}[\)\]\}}\-_, ]")).unwrap();
                     re
                 })
                 .collect();
