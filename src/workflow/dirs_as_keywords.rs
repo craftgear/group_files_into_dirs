@@ -4,11 +4,13 @@ use crate::libs::keywords::extract_keywords;
 use crate::libs::stdout::*;
 
 use regex::Regex;
+use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
 pub fn execute(pathbuf: PathBuf, verbose: bool) -> Result<Vec<String>, Error> {
     let mut moved_files = vec![];
+    let mut update_dirs: HashSet<String> = HashSet::new();
 
     let dirnames = dirs_in_dir(&pathbuf)?;
 
@@ -53,6 +55,7 @@ pub fn execute(pathbuf: PathBuf, verbose: bool) -> Result<Vec<String>, Error> {
                     let result = fs::rename(&src, &dst);
 
                     if result.is_ok() {
+                        update_dirs.insert(dirname.to_string());
                         let dst_string = dst.to_str().unwrap().to_string();
                         if verbose {
                             moved(filename.to_string(), dst_string.clone());
@@ -67,7 +70,7 @@ pub fn execute(pathbuf: PathBuf, verbose: bool) -> Result<Vec<String>, Error> {
         }
     }
 
-    print_result(dirnames.len(), Ok(moved_files.clone()));
+    print_result(update_dirs.len(), Ok(moved_files.clone()));
 
     Ok(moved_files)
 }
