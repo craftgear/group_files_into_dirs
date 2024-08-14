@@ -6,7 +6,6 @@ a CLI tool to group files into directories based on their filenames.
 
 ## Installation
 
-
 Download binary file from [releases](https://github.com/craftgear/group_files_into_dirs/releases) page and put it in a path directory.
 
 or using cargo to Install
@@ -44,6 +43,23 @@ group_files_into_dir <dir>
 group_files_into_dir -k <keywords> <dir> 
 ```
 
+### use directory name as keyword
+Once you've created directories with interactive mode or specific keywords mode, 
+this mode would be your daily driver.
+
+With `-d` option, you can group files into directories based on directory names.
+
+Let's say you have `inquiry` directory and `quote` directory in `docs` directory. 
+Now when you put `inquiry_2021-01-01.txt` and `quote_2021-01-01.txt` in `docs` directory,
+you can move them into `inquiry` and `quote` directories with this mode.
+
+- `dir` - directory to group files in.
+
+```bash
+group_files_into_dir -d <dir> 
+```
+
+
 ## Example
 
 ```bash
@@ -56,6 +72,11 @@ group_files_into_dir ./
 # group files in current directory based on keywords "hello" and "world"
 # no keyword selection prompt will be shown.
 group_files_into_dir -k "hello,world" ./
+```
+
+```bash
+# now you can occasionally organize files with -d option.
+group_files_into_dir -d ./
 ```
 
 ## LICENSE

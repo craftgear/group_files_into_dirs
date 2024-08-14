@@ -1,8 +1,22 @@
-use owo_colors::OwoColorize;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::libs::errors::Error;
+use crate::libs::stdout::*;
+
+pub fn parse_path(mut path: String) -> Result<PathBuf, Error> {
+    if cfg!(windows) {
+        if path.ends_with("\"") {
+            path = path.trim_end_matches("\"").to_string();
+        }
+    }
+
+    if !Path::new(&path).exists() {
+        return Err(Error::IOError(format!("path {} does not exist", path)));
+    }
+
+    return Ok(Path::new(&path).to_path_buf());
+}
 
 pub fn mkdir_for_keyword(keyword: String, basepath: &PathBuf) -> Result<String, Error> {
     if !Path::exists(&basepath) {
@@ -61,8 +75,7 @@ pub fn move_files_to_dir(
                 let src = &basepath.join(filename);
                 // files could be moved by other keywords.
                 if !src.exists() {
-                    let msg = format!("{} is already moved", filename);
-                    println!("{}", msg.yellow());
+                    already_moved(filename.to_string());
                     continue;
                 }
                 // create a new directory for the keyword.
@@ -71,25 +84,18 @@ pub fn move_files_to_dir(
                 let dst = &basepath.join(dirname).join(filename);
                 // destination file is already exists.
                 if dst.exists() {
-                    let msg = format!("{} is already exists in {}", filename, keyword);
-                    println!("{}", msg.yellow());
+                    already_exists(filename.to_string());
                     continue;
                 }
                 let result = fs::rename(src, &dst);
                 if result.is_ok() {
-                    moved_files.push(dst.to_str().unwrap().to_string());
+                    let dst_string = dst.to_str().unwrap().to_string();
                     if verbose {
-                        let msg = format!("move {} to directory {}", filename, &dst.display());
-                        println!("{}", msg.blue());
+                        moved(filename.to_string(), dst_string.clone());
                     }
+                    moved_files.push(dst_string);
                 } else {
-                    let msg = format!(
-                        "src {}\nfilename {}\ndst {}\n",
-                        src.display(),
-                        filename,
-                        dst.display()
-                    );
-                    println!("{}", msg.red());
+                    error(format!("src {}\ndst {}\n", src.display(), dst.display()));
                     return Err(Error::MoveFileError(result.err().unwrap().to_string()));
                 }
             }
@@ -106,32 +112,50 @@ pub fn move_files_to_dir_by_keywords(
 ) -> Result<(), Error> {
     let files = files_in_dir(&pathbuf)?;
 
-    match move_files_to_dir(&pathbuf, &files, &keywords, verbose) {
-        Ok(result) => {
-            if result.len() == 0 {
-                let msg = format!("no files are moved.");
-                println!("{}", msg.bold().blue());
-            } else {
-                let msg = format!(
-                    "moved {} files to {} directories.",
-                    result.len(),
-                    keywords.len()
-                );
-                println!("{}", msg.bold().green());
-            }
-        }
-        Err(err) => {
-            let msg = format!("{}", err);
-            println!("Error: {}.", msg.bold().red());
-        }
-    };
+    let result = move_files_to_dir(&pathbuf, &files, &keywords, verbose);
+    print_result(keywords.len(), result);
 
     Ok(())
+}
+
+pub fn dirs_in_dir(path: &PathBuf) -> Result<Vec<String>, Error> {
+    let dirs = fs::read_dir(path)?
+        .filter_map(|e| {
+            if let Ok(entry) = e {
+                let metadata = entry.metadata().ok()?;
+                let filename = entry.file_name().into_string().ok()?;
+
+                if filename.starts_with(".") || !metadata.is_dir() {
+                    return None;
+                }
+
+                return Some(filename);
+            }
+            None
+        })
+        .collect();
+
+    Ok(dirs)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashSet;
+
+    #[test]
+    fn test_check_path_return_error_unless_path_exists() {
+        if let Err(e) = parse_path("hogehoge".to_string()) {
+            assert_eq!(e.to_string(), "io error: path hogehoge does not exist");
+        };
+    }
+
+    #[test]
+    fn test_check_path_can_parse_windows_terminal_path() {
+        if let Ok(pathbuf) = parse_path("path\"".to_string()) {
+            assert_eq!(pathbuf, PathBuf::from("path"));
+        };
+    }
 
     #[test]
     fn test_mkdir_for_keywords() {
@@ -160,16 +184,16 @@ mod tests {
         if Path::exists(&tmpdir) {
             fs::remove_dir_all(&tmpdir).unwrap();
         }
-
         fs::create_dir(&tmpdir).unwrap();
-        for file in FILES.iter() {
+
+        for file in FILES {
             let path = tmpdir.join(file);
             fs::File::create(&path).unwrap();
         }
 
         let result = files_in_dir(&tmpdir).unwrap();
         assert_eq!(result.len(), FILES.len());
-        for file in FILES.iter() {
+        for file in FILES {
             assert_eq!(result.contains(&file.to_string()), true);
         }
     }
@@ -181,9 +205,9 @@ mod tests {
         if Path::exists(&tmpdir) {
             fs::remove_dir_all(&tmpdir).unwrap();
         }
-
         fs::create_dir(&tmpdir).unwrap();
-        for file in FILES.iter() {
+
+        for file in FILES {
             let path = tmpdir.join(file);
             fs::File::create(&path).unwrap();
         }
@@ -196,5 +220,30 @@ mod tests {
         for file in moved_files.iter() {
             assert_eq!(Path::new(file).exists(), true);
         }
+    }
+
+    #[test]
+    fn test_dirs_in_dir() {
+        let tmpdir = std::env::temp_dir();
+        let tmpdir = tmpdir.join("test_dirs_in_dir");
+        if Path::exists(&tmpdir) {
+            fs::remove_dir_all(&tmpdir).unwrap();
+        }
+        fs::create_dir(&tmpdir).unwrap();
+
+        let dirnames = vec!["inquiry", "invoice", "questionnaire"];
+        for dir in dirnames.iter() {
+            let path = tmpdir.join(dir);
+            println!("path is {:?}", path);
+            fs::create_dir(&path).unwrap();
+        }
+
+        let result = dirs_in_dir(&tmpdir).unwrap();
+        assert_eq!(result.len(), dirnames.len());
+        let result_set: HashSet<&String> = result.iter().collect();
+        assert_eq!(
+            dirnames.iter().all(|x| result_set.contains(&x.to_string())),
+            true
+        );
     }
 }

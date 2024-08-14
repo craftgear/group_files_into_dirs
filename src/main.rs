@@ -1,13 +1,14 @@
 use clap::Parser;
-use owo_colors::OwoColorize;
-use std::path::Path;
+use std::path::PathBuf;
 
 mod libs;
+mod workflow;
 
 use libs::errors::Error;
-use libs::fs::move_files_to_dir_by_keywords;
-use libs::interactive;
+use libs::fs::{move_files_to_dir_by_keywords, parse_path};
 use libs::parse_args::parse_args;
+use libs::tui;
+use workflow::{dirs_as_keywords, interactive};
 
 #[derive(Parser, Debug)]
 pub struct Args {
@@ -33,38 +34,32 @@ fn main() -> Result<(), Error> {
         dir_as_keyword,
     } = Args::parse();
 
-    if !Path::new(&path).exists() {
-        let msg = format!("Error: path {} does not exist", path);
-        println!("{}", msg.red());
-        return Ok(());
-    }
+    let pathbuf = parse_path(path)?;
 
     if let Some(keywords) = keywords {
-        return use_keywords(keywords, path, verbose);
+        return use_keywords(keywords, pathbuf, verbose);
     }
 
     if dir_as_keyword {
-        return use_dirs_as_keywords(path, verbose);
+        return use_dirs_as_keywords(pathbuf, verbose);
     }
 
-    interactive_mode(path, verbose)
+    interactive_mode(pathbuf, verbose)
 }
 
-fn use_keywords(keywords: String, path: String, verbose: bool) -> Result<(), Error> {
-    let (keywords, path) = parse_args(keywords, path)?;
-    let pathbuf = Path::new(&path).to_path_buf();
+fn use_keywords(keywords: String, pathbuf: PathBuf, verbose: bool) -> Result<(), Error> {
+    let keywords = parse_args(keywords)?;
 
     move_files_to_dir_by_keywords(keywords, pathbuf, verbose)
 }
 
-fn interactive_mode(path: String, verbose: bool) -> Result<(), Error> {
-    let pathbuf = Path::new(&path).to_path_buf();
-
-    let keywords = interactive::execute(&pathbuf)?;
+fn interactive_mode(pathbuf: PathBuf, verbose: bool) -> Result<(), Error> {
+    let keywords = interactive::execute(&pathbuf, tui::run)?;
 
     move_files_to_dir_by_keywords(keywords, pathbuf, verbose)
 }
 
-fn use_dirs_as_keywords(path: String, verbose: bool) -> Result<(), Error> {
+fn use_dirs_as_keywords(pathbuf: PathBuf, verbose: bool) -> Result<(), Error> {
+    let _ = dirs_as_keywords::execute(pathbuf, verbose)?;
     Ok(())
 }

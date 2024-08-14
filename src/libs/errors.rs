@@ -8,8 +8,8 @@ pub enum Error {
     KeywordLengthError(String),
     #[error("io error: {0}")]
     IOError(String),
-    // #[error("parse error: {0}")]
-    // ParseError(String),
+    #[error("no keywords found")]
+    NoKeywordsFound,
 }
 
 impl From<std::io::Error> for Error {
