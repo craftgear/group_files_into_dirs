@@ -107,6 +107,7 @@ pub fn sort_by_count_and_keyword_length(
     sorted_keyword_vec
 }
 
+#[allow(dead_code)]
 pub fn extract_keywords_from_camel_case(filename_wo_ext: &String) -> Vec<String> {
     let modified_string = filename_wo_ext
         .chars()
