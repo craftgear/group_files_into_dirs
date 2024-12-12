@@ -8,6 +8,7 @@ use crate::libs::keywords::*;
 pub fn execute(
     pathbuf: &PathBuf,
     run: fn(Vec<(String, usize)>) -> Result<Vec<String>, Error>,
+    space_delimiters: bool,
 ) -> Result<Vec<String>, Error> {
     println!("");
     let mut sp = Spinner::new(
@@ -16,7 +17,7 @@ pub fn execute(
     );
 
     let filenames = files_in_dir(&pathbuf)?;
-    let keyword_hash = extract_keywords_and_count_from_filenames(&filenames);
+    let keyword_hash = extract_keywords_and_count_from_filenames(&filenames, space_delimiters);
     let keyword_vec = sort_by_count_and_keyword_length(keyword_hash);
 
     // filter keywords that appear more than once.
@@ -65,7 +66,7 @@ mod tests {
         };
 
         let expect = vec!["01", "2021", "inquiry", "invoice", "2022", "02"];
-        let result = execute(&tmpdir, tui_mock).unwrap();
+        let result = execute(&tmpdir, tui_mock, false).unwrap();
         assert_eq!(
             result
                 .iter()

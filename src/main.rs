@@ -20,10 +20,27 @@ pub struct Args {
     pub keywords: Option<String>,
     #[clap(required = true)]
     pub path: String,
-    #[clap(help = "Verbose output", long, short)]
+    #[clap(
+        default_value_t = false,
+        help = "Verbose output (default: false)",
+        long,
+        short
+    )]
     pub verbose: bool,
-    #[clap(help = "Use directory as keyword", long, short)]
+    #[clap(
+        default_value_t = false,
+        help = "Use directory names as keyword (default: false)",
+        long,
+        short
+    )]
     pub dir_as_keyword: bool,
+    #[clap(
+        default_value_t = false,
+        help = "interactive mode: use spaces as delimiters (default: false)",
+        long,
+        short
+    )]
+    pub space_delimiter: bool,
 }
 
 fn main() -> Result<(), Error> {
@@ -32,8 +49,10 @@ fn main() -> Result<(), Error> {
         path,
         verbose,
         dir_as_keyword,
+        space_delimiter,
     } = Args::parse();
 
+    println!("space_delimiter is {:?}", space_delimiter);
     let pathbuf = parse_path(path)?;
 
     if let Some(keywords) = keywords {
@@ -44,7 +63,7 @@ fn main() -> Result<(), Error> {
         return use_dirs_as_keywords(pathbuf, verbose);
     }
 
-    interactive_mode(pathbuf, verbose)
+    interactive_mode(pathbuf, verbose, space_delimiter)
 }
 
 fn use_keywords(keywords: String, pathbuf: PathBuf, verbose: bool) -> Result<(), Error> {
@@ -53,8 +72,8 @@ fn use_keywords(keywords: String, pathbuf: PathBuf, verbose: bool) -> Result<(),
     move_files_to_dir_by_keywords(keywords, pathbuf, verbose)
 }
 
-fn interactive_mode(pathbuf: PathBuf, verbose: bool) -> Result<(), Error> {
-    let keywords = interactive::execute(&pathbuf, tui::run)?;
+fn interactive_mode(pathbuf: PathBuf, verbose: bool, space_delimiter: bool) -> Result<(), Error> {
+    let keywords = interactive::execute(&pathbuf, tui::run, space_delimiter)?;
 
     move_files_to_dir_by_keywords(keywords, pathbuf, verbose)
 }

@@ -3,14 +3,15 @@ use std::collections::HashMap;
 
 static EXT_REGEX_STR: &str = r"\.([a-zA-Z0-9]+)$";
 static PAREN_REGEX_STR: &str = r"\((.+?)\)|\[(.+?)\]|\{(.+?)\}";
-static DELIMITERS: [char; 4] = [',', '-', '_', ' '];
+static DELIMITERS: [char; 3] = [',', '-', '_'];
+static DELIMITERS_WITH_SPACE: [char; 4] = [',', '-', '_', ' '];
 
 fn extract_file_basename(filename: &String) -> String {
     let re = Regex::new(EXT_REGEX_STR).unwrap();
     re.replace_all(filename, "").to_string()
 }
 
-pub fn extract_keywords(filename_wo_ext: &String) -> Vec<String> {
+pub fn extract_keywords(filename_wo_ext: &String, space_delimiters: bool) -> Vec<String> {
     let filename_wo_ext = extract_file_basename(filename_wo_ext);
     let re = Regex::new(PAREN_REGEX_STR).unwrap();
     let mut keywords = re
@@ -36,10 +37,15 @@ pub fn extract_keywords(filename_wo_ext: &String) -> Vec<String> {
 
     // カッコを削除して、残りの文字列を取得
     let rest = re.replace_all(&filename_wo_ext, "");
+    let delimiters: &[char] = if space_delimiters {
+        &DELIMITERS_WITH_SPACE[..]
+    } else {
+        &DELIMITERS[..]
+    };
     let mut rest_vec = rest
-        .split(DELIMITERS)
+        .split(delimiters)
         .filter_map(|s| {
-            let s = s.to_string();
+            let s = s.trim().to_string();
             // keywords should have more than 1 character
             if s.chars().count() > 1 {
                 return Some(s);
@@ -55,10 +61,11 @@ pub fn extract_keywords(filename_wo_ext: &String) -> Vec<String> {
 
 pub fn extract_keywords_and_count_from_filenames(
     filenames: &Vec<String>,
+    space_delimiters: bool,
 ) -> HashMap<String, usize> {
     let keyword_hash: HashMap<String, usize> =
         filenames.iter().fold(HashMap::new(), |mut acc, filename| {
-            let keywords = extract_keywords(filename);
+            let keywords = extract_keywords(filename, space_delimiters);
             keywords.iter().for_each(|keyword| {
                 acc.entry(keyword.clone())
                     .and_modify(|count| *count += 1)
@@ -126,15 +133,37 @@ pub fn extract_keywords_from_camel_case(filename_wo_ext: &String) -> Vec<String>
     return keywords;
 }
 
+pub fn dirname_to_keyword_regexen(dirname: &String) -> Vec<Regex> {
+    extract_keywords(dirname, false) // do not use spaces as delimiters?
+        .into_iter()
+        .filter(|k| k.len() > 1)
+        .map(|k| {
+            let re = regex::Regex::new(&format!(r"[\(\[\{{\-_, ]?{k}[\)\]\}}\-_, ]")).unwrap();
+            re
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_extract_keywords() {
+    fn test_extract_keywords_wo_spaces() {
         let filename =
             "(000)[111](222) [333(444)] (9)(00){zzz} aaa_bbb-ccc ddd,eee.txt".to_string();
-        let result = extract_keywords(&filename);
+        let result = extract_keywords(&filename, false);
+        assert_eq!(
+            result,
+            vec!["000", "111", "222", "333(444)", "00", "zzz", "aaa", "bbb", "ccc ddd", "eee"]
+        );
+    }
+
+    #[test]
+    fn test_extract_keywords_w_spaces() {
+        let filename =
+            "(000)[111](222) [333(444)] (9)(00){zzz} aaa_bbb-ccc ddd,eee.txt".to_string();
+        let result = extract_keywords(&filename, true);
         assert_eq!(
             result,
             vec!["000", "111", "222", "333(444)", "00", "zzz", "aaa", "bbb", "ccc", "ddd", "eee"]
@@ -148,7 +177,7 @@ mod tests {
             "(000)[111](222) [444(555)] (9)(00){zzz} aaa_bbb-ccc ddd,fff.txt".to_string(),
             "(000)[111](222) [555(666)] (9)(00){zzz} aaa_bbb-ccc ddd,ggg.txt".to_string(),
         ];
-        let result = extract_keywords_and_count_from_filenames(&filenames);
+        let result = extract_keywords_and_count_from_filenames(&filenames, true);
         let expected = HashMap::from_iter(vec![
             ("000".to_string(), 3),
             ("111".to_string(), 3),
@@ -213,5 +242,21 @@ mod tests {
             result,
             vec!["camel", "Case", "File", "Name", "Could", "Be", "Parsed"]
         );
+    }
+
+    #[test]
+    fn test_dirname_to_keyword_regexen() {
+        let dirname = "inquiry_[a_company] (2024)".to_string();
+        let result = dirname_to_keyword_regexen(&dirname);
+
+        let result_str = result.iter().map(|re| re.as_str()).collect::<Vec<&str>>();
+
+        let expected = vec![
+            r"[\(\[\{\-_, ]?inquiry[\)\]\}\-_, ]",
+            r"[\(\[\{\-_, ]?a_company[\)\]\}\-_, ]",
+            r"[\(\[\{\-_, ]?2024[\)\]\}\-_, ]",
+        ];
+
+        assert!(result_str.iter().all(|x| expected.contains(&x)));
     }
 }

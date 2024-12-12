@@ -1,6 +1,6 @@
 use crate::libs::errors::Error;
 use crate::libs::fs::{dirs_in_dir, files_in_dir};
-use crate::libs::keywords::extract_keywords;
+use crate::libs::keywords::dirname_to_keyword_regexen;
 use crate::libs::stdout::*;
 
 use regex::Regex;
@@ -21,15 +21,7 @@ pub fn execute(pathbuf: PathBuf, verbose: bool) -> Result<Vec<String>, Error> {
     let dir_with_keyword_regexen: Vec<(String, Vec<Regex>)> = dirnames
         .iter()
         .map(|dirname| {
-            let keyword_regexen: Vec<Regex> = extract_keywords(dirname)
-                .into_iter()
-                .filter(|k| k.len() > 1)
-                .map(|k| {
-                    let re =
-                        regex::Regex::new(&format!(r"[\(\[\{{\-_, ]?{k}[\)\]\}}\-_, ]")).unwrap();
-                    re
-                })
-                .collect();
+            let keyword_regexen: Vec<Regex> = dirname_to_keyword_regexen(dirname);
             (dirname.to_string(), keyword_regexen)
         })
         .collect();
