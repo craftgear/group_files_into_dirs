@@ -23,11 +23,13 @@ cargo build --release
 
 ## Usage
 
-### Interactive mode (default)
+### 1. Interactive mode (default)
 
-extract keywords from filenames.
-delimiters are `,_-` and braces `()[]{}` .
-if you use `spaces` as delimiters, then add `-s` option.
+Extract keywords from filenames and show them as a list of checkboxes for you to choose them.
+
+Default delimiters are `,_-` and braces `()[]{}` .
+
+If you want to use `spaces` as delimiters as well, then add `-s` option.
 
 - `dir` - directory to group files in.
 
@@ -35,7 +37,7 @@ if you use `spaces` as delimiters, then add `-s` option.
 group_files_into_dir <dir>
 ```
 
-### specify keywords by yourself
+### 2. specify keywords by yourself
 
 - `keywords` - words to use for grouping files, comma separated.
 - `dir` - directory to group files in.
@@ -44,7 +46,7 @@ group_files_into_dir <dir>
 group_files_into_dir -k <keywords> <dir> 
 ```
 
-### use directory name as keyword
+### 3. use directory names as keywords
 Once you've created directories with interactive mode or specific keywords mode, 
 this mode would be your daily driver.
 
